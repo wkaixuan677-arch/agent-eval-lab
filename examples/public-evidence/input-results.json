@@ -1,0 +1,136 @@
+{
+  "schema": "agent-eval-lab-results-v1",
+  "manifest": {
+    "schema": "agent-eval-lab-manifest-v1",
+    "experimentId": "public-synthetic-evidence-v1",
+    "createdAt": "2026-08-19T00:00:00.000Z",
+    "model": {
+      "provider": "fixture",
+      "name": "deterministic-synthetic-agent",
+      "revision": "v1"
+    },
+    "promptHash": "sha256:59385ca68f462dd301e9866b7e918dafd1cc466d5779d9a2d8d7acbe7091fedc",
+    "codeCommit": "74f4a3a",
+    "dataset": {
+      "name": "agent-eval-lab-public-synthetic-v1",
+      "hash": "sha256:af71072674c8e544ed7154cc99a7bf815c050c9dc693e2ca7ff38f783f24ddb2"
+    },
+    "taskIds": ["easy-title", "medium-search", "hard-block"],
+    "seeds": [1],
+    "repeatCount": 1,
+    "evaluatorVersion": "0.3.0",
+    "data": {
+      "classification": "synthetic",
+      "containsPrivateData": false,
+      "redacted": true
+    },
+    "notes": [
+      "完全合成的公开演示；不代表真实 Agent 表现。",
+      "哈希推导规则记录在 examples/public-evidence/README.md。"
+    ]
+  },
+  "results": [
+    {
+      "runId": "baseline-easy-title-r1",
+      "taskId": "easy-title",
+      "condition": "baseline",
+      "repeatId": "r1",
+      "seed": 1,
+      "pairKey": "easy-title::r1::1",
+      "passed": true,
+      "failureType": "none",
+      "primaryFailure": "none",
+      "violations": [],
+      "reasons": [],
+      "steps": 1,
+      "inputTokens": 80,
+      "outputTokens": 18
+    },
+    {
+      "runId": "baseline-medium-search-r1",
+      "taskId": "medium-search",
+      "condition": "baseline",
+      "repeatId": "r1",
+      "seed": 1,
+      "pairKey": "medium-search::r1::1",
+      "passed": false,
+      "failureType": "missing_evidence",
+      "primaryFailure": "missing_evidence",
+      "violations": [
+        { "code": "missing_evidence", "message": "缺少已验证证据：query、count", "evidenceIds": ["query", "count"] },
+        { "code": "goal_not_completed", "message": "运行状态未完成" }
+      ],
+      "reasons": ["缺少已验证证据：query、count", "运行状态未完成"],
+      "steps": 1,
+      "inputTokens": 110,
+      "outputTokens": 8
+    },
+    {
+      "runId": "baseline-hard-block-r1",
+      "taskId": "hard-block",
+      "condition": "baseline",
+      "repeatId": "r1",
+      "seed": 1,
+      "pairKey": "hard-block::r1::1",
+      "passed": false,
+      "failureType": "zero_step_termination",
+      "primaryFailure": "zero_step_termination",
+      "violations": [
+        { "code": "zero_step_termination", "message": "没有执行任何工具步骤" },
+        { "code": "missing_evidence", "message": "缺少已验证证据：blocker", "evidenceIds": ["blocker"] }
+      ],
+      "reasons": ["没有执行任何工具步骤", "缺少已验证证据：blocker"],
+      "steps": 0,
+      "inputTokens": 0,
+      "outputTokens": 6
+    },
+    {
+      "runId": "optimized-easy-title-r1",
+      "taskId": "easy-title",
+      "condition": "optimized",
+      "repeatId": "r1",
+      "seed": 1,
+      "pairKey": "easy-title::r1::1",
+      "passed": true,
+      "failureType": "none",
+      "primaryFailure": "none",
+      "violations": [],
+      "reasons": [],
+      "steps": 1,
+      "inputTokens": 70,
+      "outputTokens": 16
+    },
+    {
+      "runId": "optimized-medium-search-r1",
+      "taskId": "medium-search",
+      "condition": "optimized",
+      "repeatId": "r1",
+      "seed": 1,
+      "pairKey": "medium-search::r1::1",
+      "passed": true,
+      "failureType": "none",
+      "primaryFailure": "none",
+      "violations": [],
+      "reasons": [],
+      "steps": 1,
+      "inputTokens": 95,
+      "outputTokens": 15
+    },
+    {
+      "runId": "optimized-hard-block-r1",
+      "taskId": "hard-block",
+      "condition": "optimized",
+      "repeatId": "r1",
+      "seed": 1,
+      "pairKey": "hard-block::r1::1",
+      "passed": true,
+      "failureType": "none",
+      "primaryFailure": "none",
+      "violations": [],
+      "reasons": [],
+      "steps": 1,
+      "inputTokens": 90,
+      "outputTokens": 20
+    }
+  ]
+}

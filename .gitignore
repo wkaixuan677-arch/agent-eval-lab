@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.npm-cache/
 reports/*.json
 !reports/.gitkeep
 .env

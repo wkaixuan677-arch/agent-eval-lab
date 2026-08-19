@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/wkaixuan677-arch/agent-eval-lab/schemas/evaluation-input.schema.json",
+  "title": "Agent Eval Lab v0.3 Input",
+  "oneOf": [
+    { "$ref": "#/$defs/trajectoryDocument" },
+    { "$ref": "#/$defs/resultsDocument" }
+  ],
+  "$defs": {
+    "manifest": {
+      "type": "object",
+      "required": ["schema", "experimentId", "createdAt", "model", "promptHash", "codeCommit", "dataset", "taskIds", "seeds", "repeatCount", "evaluatorVersion", "data"],
+      "properties": {
+        "schema": { "const": "agent-eval-lab-manifest-v1" },
+        "experimentId": { "type": "string", "minLength": 1 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "model": {
+          "type": "object",
+          "required": ["provider", "name"],
+          "properties": {
+            "provider": { "type": "string", "minLength": 1 },
+            "name": { "type": "string", "minLength": 1 },
+            "revision": { "type": "string", "minLength": 1 }
+          }
+        },
+        "promptHash": { "type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$" },
+        "codeCommit": { "type": "string", "pattern": "^[0-9a-fA-F]{7,40}$" },
+        "dataset": {
+          "type": "object",
+          "required": ["name", "hash"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "hash": { "type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$" }
+          }
+        },
+        "taskIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "seeds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "integer" } },
+        "repeatCount": { "type": "integer", "minimum": 1 },
+        "evaluatorVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$" },
+        "data": {
+          "type": "object",
+          "required": ["classification", "containsPrivateData", "redacted"],
+          "properties": {
+            "classification": { "enum": ["synthetic", "controlled", "public"] },
+            "containsPrivateData": { "type": "boolean" },
+            "redacted": { "type": "boolean" }
+          }
+        },
+        "notes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["claimId", "value", "sourceEventId"],
+      "properties": {
+        "claimId": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "sourceEventId": { "type": "string", "minLength": 1 },
+        "sourceUrl": { "type": "string", "minLength": 1 },
+        "contentHash": { "type": "string", "minLength": 1 }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["eventId", "type", "step", "timestamp"],
+      "properties": {
+        "eventId": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["plan", "tool_call", "tool_result", "verification", "final"] },
+        "step": { "type": "integer", "minimum": 0 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "tool": { "type": "string", "minLength": 1 },
+        "success": { "type": "boolean" },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "citations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "text": { "type": "string" },
+        "inputTokens": { "type": "number", "minimum": 0 },
+        "outputTokens": { "type": "number", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "enum": ["tool_result", "verification"] } }, "required": ["type"] },
+          "then": { "required": ["success"] }
+        }
+      ]
+    },
+    "task": {
+      "type": "object",
+      "required": ["taskId", "difficulty", "objective", "requiredEvidence"],
+      "properties": {
+        "taskId": { "type": "string", "minLength": 1 },
+        "difficulty": { "enum": ["easy", "medium", "hard"] },
+        "objective": { "type": "string", "minLength": 1 },
+        "requiredEvidence": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": ["runId", "taskId", "condition", "repeatId", "seed", "status", "events"],
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "taskId": { "type": "string", "minLength": 1 },
+        "condition": { "enum": ["baseline", "optimized"] },
+        "repeatId": { "type": "string", "minLength": 1 },
+        "seed": { "type": "integer" },
+        "status": { "enum": ["completed", "failed", "blocked"] },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+      }
+    },
+    "failureType": {
+      "enum": ["none", "missing_trajectory", "zero_step_termination", "empty_final_answer", "missing_evidence", "invalid_evidence_source", "tool_error", "blocked", "goal_not_completed"]
+    },
+    "violation": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "enum": ["missing_trajectory", "zero_step_termination", "empty_final_answer", "missing_evidence", "invalid_evidence_source", "tool_error", "blocked", "goal_not_completed"] },
+        "message": { "type": "string", "minLength": 1 },
+        "evidenceIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["runId", "taskId", "condition", "repeatId", "seed", "pairKey", "passed", "failureType", "reasons", "steps", "inputTokens", "outputTokens"],
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "taskId": { "type": "string", "minLength": 1 },
+        "condition": { "enum": ["baseline", "optimized"] },
+        "repeatId": { "type": "string", "minLength": 1 },
+        "seed": { "type": "integer" },
+        "pairKey": { "type": "string", "minLength": 1 },
+        "passed": { "type": "boolean" },
+        "failureType": { "$ref": "#/$defs/failureType" },
+        "primaryFailure": { "$ref": "#/$defs/failureType" },
+        "violations": { "type": "array", "items": { "$ref": "#/$defs/violation" } },
+        "reasons": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "steps": { "type": "integer", "minimum": 0 },
+        "inputTokens": { "type": "number", "minimum": 0 },
+        "outputTokens": { "type": "number", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "passed": { "const": true } }, "required": ["passed"] },
+          "then": {
+            "properties": {
+              "failureType": { "const": "none" },
+              "primaryFailure": { "const": "none" },
+              "violations": { "maxItems": 0 },
+              "reasons": { "maxItems": 0 }
+            }
+          },
+          "else": {
+            "properties": {
+              "failureType": { "not": { "const": "none" } },
+              "primaryFailure": { "not": { "const": "none" } },
+              "violations": { "minItems": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "trajectoryDocument": {
+      "type": "object",
+      "required": ["schema", "manifest", "tasks", "runs"],
+      "properties": {
+        "schema": { "const": "agent-eval-lab-trajectories-v1" },
+        "manifest": { "$ref": "#/$defs/manifest" },
+        "tasks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/task" } },
+        "runs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/run" } }
+      }
+    },
+    "resultsDocument": {
+      "type": "object",
+      "required": ["schema", "manifest", "results"],
+      "properties": {
+        "schema": { "const": "agent-eval-lab-results-v1" },
+        "manifest": { "$ref": "#/$defs/manifest" },
+        "results": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/result" } }
+      }
+    }
+  }
+}
