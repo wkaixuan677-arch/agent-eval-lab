@@ -1,0 +1,22 @@
+{
+  "name": "agent-eval-lab",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "可复现的 Agent 轨迹评测、失败归因与配对 A/B 工具",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --import tsx --test test/*.test.ts",
+    "demo": "tsx src/demo.ts",
+    "check": "npm run build && npm test && npm run demo"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.10",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
