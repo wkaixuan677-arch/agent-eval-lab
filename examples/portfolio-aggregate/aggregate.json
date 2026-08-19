@@ -1,0 +1,71 @@
+{
+  "schema": "agent-eval-lab-portfolio-aggregate-v1",
+  "provenance": {
+    "source": "private-controlled-prototype",
+    "verification": "owner-verified-aggregate",
+    "publicReproducibility": "aggregate-only",
+    "containsRawTrajectories": false,
+    "containsPrivateTasks": false,
+    "statement": "公开仓库只能校验汇总算术与统计口径，不能复现私有原型的原始运行。"
+  },
+  "experiments": {
+    "systemAB": {
+      "scope": "36-task-benchmark-3-rounds",
+      "total": 108,
+      "baselinePassed": 81,
+      "optimizedPassed": 106,
+      "baselinePercent": 75.00,
+      "optimizedPercent": 98.15,
+      "tokenRounds": [
+        { "baselineTotal": 1276118, "optimizedTotal": 879689 },
+        { "baselineTotal": 1498614, "optimizedTotal": 1002586 },
+        { "baselineTotal": 1142450, "optimizedTotal": 830836 }
+      ],
+      "meanTokenReductionPercent": 30.48
+    },
+    "firstRoundPaired": {
+      "scope": "first-round-only",
+      "failToPass": 8,
+      "passToFail": 0,
+      "mcnemarExactP": 0.0078125
+    },
+    "memoryAB": {
+      "scope": "memory-off-vs-on-90-paired-executions",
+      "total": 90,
+      "offPassed": 89,
+      "onPassed": 88,
+      "offPercent": 98.89,
+      "onPercent": 97.78,
+      "offSteps": 508,
+      "onSteps": 483,
+      "stepReductionPercent": 4.92,
+      "offTokens": 4484954,
+      "onTokens": 4337868,
+      "tokenReductionPercent": 3.28,
+      "negativeTransfers": 2
+    },
+    "hardFirstRound": {
+      "scope": "12-hard-single-vs-multi-first-round",
+      "total": 12,
+      "singlePassed": 12,
+      "multiPassed": 10,
+      "singlePercent": 100.00,
+      "multiPercent": 83.33,
+      "passToFail": 2
+    },
+    "hardTargetedRegression": {
+      "scope": "previously-failed-cases-only",
+      "total": 2,
+      "passed": 2,
+      "percent": 100.00
+    },
+    "compositeTasks": {
+      "scope": "separate-6-task-composite-suite",
+      "total": 6,
+      "singlePassed": 2,
+      "multiPassed": 6,
+      "singlePercent": 33.33,
+      "multiPercent": 100.00
+    }
+  }
+}

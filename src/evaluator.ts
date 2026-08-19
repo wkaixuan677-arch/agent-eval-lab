@@ -1,15 +1,33 @@
-import type { AgentRun, EvaluationResult, FailureType, TaskSpec } from "./types.js";
+import type {
+  AgentRun,
+  EvaluationResult,
+  FailureViolation,
+  FailureViolationCode,
+  TaskSpec,
+} from "./types.js";
 
 export function evaluateRun(task: TaskSpec, run: AgentRun): EvaluationResult {
-  const reasons: string[] = [];
-  let failureType: FailureType = "none";
+  const violations: FailureViolation[] = [];
+  const addViolation = (code: FailureViolationCode, message: string, evidenceIds?: string[]): void => {
+    const existingIndex = violations.findIndex((violation) => violation.code === code);
+    if (existingIndex !== -1) {
+      const existing = violations[existingIndex]!;
+      const mergedEvidenceIds = [...new Set([...(existing.evidenceIds ?? []), ...(evidenceIds ?? [])])];
+      violations[existingIndex] = {
+        code,
+        message: existing.message.includes(message) ? existing.message : `${existing.message}；${message}`,
+        ...(mergedEvidenceIds.length === 0 ? {} : { evidenceIds: mergedEvidenceIds }),
+      };
+      return;
+    }
+    violations.push({ code, message, ...(evidenceIds === undefined ? {} : { evidenceIds }) });
+  };
 
   if (run.taskId !== task.taskId) {
     throw new Error(`任务不匹配：${run.taskId} != ${task.taskId}`);
   }
   if (run.events.length === 0) {
-    failureType = "missing_trajectory";
-    reasons.push("轨迹为空");
+    addViolation("missing_trajectory", "轨迹为空");
   }
 
   const toolEvents = run.events.filter((event) => event.type === "tool_call");
@@ -35,45 +53,39 @@ export function evaluateRun(task: TaskSpec, run: AgentRun): EvaluationResult {
     declaredEvidence.filter((record) => !invalidEvidence.includes(record)).map((record) => record.claimId),
   );
 
-  if (failureType === "none" && toolEvents.length === 0) {
-    failureType = "zero_step_termination";
-    reasons.push("没有执行任何工具步骤");
+  if (toolEvents.length === 0) {
+    addViolation("zero_step_termination", "没有执行任何工具步骤");
   }
-  if (failureType === "none" && (!finalEvent?.text || finalEvent.text.trim().length === 0)) {
-    failureType = "empty_final_answer";
-    reasons.push("最终回答为空");
+  if (!finalEvent?.text || finalEvent.text.trim().length === 0) {
+    addViolation("empty_final_answer", "最终回答为空");
   }
-  if (failureType === "none" && invalidEvidence.length > 0) {
-    failureType = "invalid_evidence_source";
-    reasons.push(`证据未绑定成功工具结果：${invalidEvidence.map((item) => item.claimId).join("、")}`);
+  if (invalidEvidence.length > 0) {
+    const evidenceIds = [...new Set(invalidEvidence.map((item) => item.claimId))];
+    addViolation("invalid_evidence_source", `证据未绑定成功工具结果：${evidenceIds.join("、")}`, evidenceIds);
   }
   const missing = task.requiredEvidence.filter((item) => !verifiedEvidence.has(item));
-  if (failureType === "none" && missing.length > 0) {
-    failureType = "missing_evidence";
-    reasons.push(`缺少已验证证据：${missing.join("、")}`);
+  if (missing.length > 0) {
+    addViolation("missing_evidence", `缺少已验证证据：${missing.join("、")}`, missing);
   }
   const missingCitations = task.requiredEvidence.filter((item) => !(finalEvent?.citations ?? []).includes(item));
-  if (failureType === "none" && missingCitations.length > 0) {
-    failureType = "missing_evidence";
-    reasons.push(`最终回答未引用证据：${missingCitations.join("、")}`);
+  if (missingCitations.length > 0) {
+    addViolation("missing_evidence", `最终回答未引用证据：${missingCitations.join("、")}`, missingCitations);
   }
   const hasToolError = run.events.some(
     (event) => event.type === "tool_result" && event.success === false,
   );
-  if (failureType === "none" && hasToolError && run.status === "failed") {
-    failureType = "tool_error";
-    reasons.push("工具错误后未恢复");
+  if (hasToolError && run.status === "failed") {
+    addViolation("tool_error", "工具错误后未恢复");
   }
-  if (failureType === "none" && run.status === "blocked") {
-    failureType = "blocked";
-    reasons.push("任务被明确阻断");
+  if (run.status === "blocked") {
+    addViolation("blocked", "任务被明确阻断");
   }
-  if (failureType === "none" && run.status !== "completed") {
-    failureType = "goal_not_completed";
-    reasons.push("运行状态未完成");
+  if (run.status === "failed") {
+    addViolation("goal_not_completed", "运行状态未完成");
   }
 
-  const passed = failureType === "none";
+  const primaryFailure = violations[0]?.code ?? "none";
+  const passed = violations.length === 0;
   const steps = new Set(toolEvents.map((event) => event.step)).size;
   const inputTokens = run.events.reduce((sum, event) => sum + (event.inputTokens ?? 0), 0);
   const outputTokens = run.events.reduce((sum, event) => sum + (event.outputTokens ?? 0), 0);
@@ -86,8 +98,10 @@ export function evaluateRun(task: TaskSpec, run: AgentRun): EvaluationResult {
     ...(run.seed === undefined ? {} : { seed: run.seed }),
     pairKey: pairKey(run),
     passed,
-    failureType,
-    reasons,
+    failureType: primaryFailure,
+    primaryFailure,
+    violations,
+    reasons: violations.map((violation) => violation.message),
     steps,
     inputTokens,
     outputTokens,

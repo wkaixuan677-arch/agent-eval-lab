@@ -1,17 +1,39 @@
 {
   "name": "agent-eval-lab",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": false,
   "type": "module",
   "description": "可复现的 Agent 轨迹评测、失败归因与配对 A/B 工具",
   "repository": "github:wkaixuan677-arch/agent-eval-lab",
   "homepage": "https://github.com/wkaixuan677-arch/agent-eval-lab#readme",
   "bugs": "https://github.com/wkaixuan677-arch/agent-eval-lab/issues",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./schema": "./schemas/evaluation-input.schema.json"
+  },
+  "bin": {
+    "agent-eval-lab": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "schemas",
+    "examples",
+    "docs/ARCHITECTURE.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "node --import tsx --test test/*.test.ts",
     "demo": "tsx src/demo.ts",
-    "check": "npm run build && npm test && npm run demo"
+    "evaluate": "tsx src/cli.ts evaluate",
+    "evidence:recompute": "tsx src/cli.ts evaluate --input examples/public-evidence/input-results.json --output reports/public-evidence-report.json",
+    "portfolio:validate": "tsx src/validate-portfolio-aggregate.ts",
+    "prepack": "npm run build",
+    "check": "npm run build && npm test && npm run demo && npm run evidence:recompute && npm run portfolio:validate"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",

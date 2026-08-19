@@ -15,4 +15,5 @@ console.log(`Baseline: ${(report.baseline.successRate * 100).toFixed(2)}%`);
 console.log(`Optimized: ${(report.optimized.successRate * 100).toFixed(2)}%`);
 console.log(`Fail→Pass: ${report.paired.failToPass}; Pass→Fail: ${report.paired.passToFail}`);
 console.log(`McNemar exact p: ${report.paired.mcnemarExactP.toFixed(4)}`);
+console.log(`Task-cluster 95% CI: [${report.paired.taskBootstrapCI.lower.toFixed(4)}, ${report.paired.taskBootstrapCI.upper.toFixed(4)}]`);
 console.log("报告已生成：reports/demo-report.json");
