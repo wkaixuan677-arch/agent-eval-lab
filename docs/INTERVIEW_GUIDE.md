@@ -7,10 +7,10 @@ Agent Eval Lab 是一个轨迹级评测工具，重点解决“进程成功退�
 ## 2 分钟版本
 
 1. **问题**：只看退出码会把零步终止、空答案、工具失败和缺失证据误算成成功。
-2. **任务模型**：TaskSpec 明确难度、目标和必需证据；AgentRun 保存工具与验证事件。
-3. **质量门**：Evaluator 将运行完整性与目标完成分开，只信任 `verification.success=true` 中的证据。
+2. **任务模型**：TaskSpec 明确难度、目标和必需证据；AgentRun 保存工具与验证事件，并用 `taskId + repeatId + seed` 配对。
+3. **质量门**：Evaluator 将运行完整性与目标完成分开；verification 中的 claim、值和哈希必须与成功 tool_result 的产出一致，并被最终答案引用。
 4. **失败分析**：失败会进入明确 taxonomy，而不是全部归为 unknown。
-5. **统计**：相同任务进行配对，报告 fail→pass、pass→fail 和 exact McNemar p-value；步数同时报告 all-run 和 success-only，避免提前失败显得更高效。
+5. **统计**：按 `taskId + repeatId + seed` 严格配对，重复或孤立样本直接报错；报告 fail→pass、pass→fail 和 exact McNemar p-value；步数同时报告 all-run 和 success-only。
 6. **可复现性**：公开仓库只含 3 条标注清楚的合成任务，用于验证评测器本身，不冒充真实 Agent 性能。
 
 ## 高频追问

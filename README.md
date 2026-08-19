@@ -1,5 +1,9 @@
 # Agent Eval Lab
 
+[![CI](https://github.com/wkaixuan677-arch/agent-eval-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/wkaixuan677-arch/agent-eval-lab/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/wkaixuan677-arch/agent-eval-lab)](https://github.com/wkaixuan677-arch/agent-eval-lab/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **一个面向 LLM Agent 的可复现评测工具：从执行轨迹中判断目标是否真正完成，并输出失败类型和配对 A/B 报告。**
 
 很多 Agent 评测会把“进程正常退出”误当作“用户目标完成”。本项目把两者分开：只有轨迹存在、执行过有效步骤、最终回答非空且成功条件拥有已验证证据，任务才算通过。
@@ -9,6 +13,8 @@
 ![Agent Eval Lab 演示](docs/demo.gif)
 
 查看：[完整架构说明](docs/ARCHITECTURE.md) · [中文面试讲解材料](docs/INTERVIEW_GUIDE.md)
+
+作品集导航：[Browser Runtime](https://github.com/wkaixuan677-arch/browser-agent-runtime-lite) · **Agent Eval Lab** · [Research Agent](https://github.com/wkaixuan677-arch/open-source-research-agent)
 
 ## 核心流程
 
@@ -33,6 +39,8 @@
 - 区分 `missing_evidence`、`tool_error`、`blocked` 等失败类型；
 - 同时报告全量平均步数和成功任务平均步数，避免“提前失败看起来更省”；
 - 对相同任务的 baseline/optimized 结果进行配对比较；
+- 使用 `taskId + repeatId + seed` 作为配对主键，重复或缺失配对会立即失败；
+- 证据必须由成功的 `tool_result` 事件产出，验证事件的 claim、值和哈希必须与来源一致，最终回答还需显式引用对应 claim；
 - 输出 fail→pass、pass→fail 和 McNemar exact p-value；
 - 生成结构化 JSON 报告，便于人工复核和后续可视化。
 
@@ -69,9 +77,17 @@ interface TaskSpec {
   objective: string;
   requiredEvidence: string[];
 }
+
+interface EvidenceRecord {
+  claimId: string;
+  value: string;
+  sourceEventId: string;
+  sourceUrl?: string;
+  contentHash?: string;
+}
 ```
 
-轨迹事件支持 `plan`、`tool_call`、`tool_result`、`verification` 和 `final`。评测器只信任 `verification.success=true` 中列出的证据。
+轨迹事件支持 `plan`、`tool_call`、`tool_result`、`verification` 和 `final`。评测器只接受由成功 `tool_result` 产出、且内容未被后续验证事件篡改的结构化证据，并要求最终回答引用所需 claim。
 
 ## 为什么不能只看退出码
 
@@ -101,7 +117,7 @@ reports/           本地生成的报告目录
 - 当前示例规模很小，仅用于验证工具行为；
 - 尚未实现 Bootstrap 置信区间和多人盲标一致性分析；
 - 没有接入 LLM-as-a-Judge，避免把未经校准的 Judge 当作真值；
-- 当前按 `taskId` 做一对一配对，重复实验需要增加 repeat/seed 维度；
+- 当前要求每次运行提供 `repeatId`，可选 `seed`，并严格拒绝重复或孤立配对；
 - 仓库不宣称复现作者私有项目中的 216 次或 180 次实验。
 
 ## Roadmap

@@ -8,13 +8,23 @@ export interface TaskSpec {
   requiredEvidence: string[];
 }
 
+export interface EvidenceRecord {
+  claimId: string;
+  value: string;
+  sourceEventId: string;
+  sourceUrl?: string;
+  contentHash?: string;
+}
+
 export interface TrajectoryEvent {
+  eventId: string;
   type: "plan" | "tool_call" | "tool_result" | "verification" | "final";
   step: number;
   timestamp: string;
   tool?: string;
   success?: boolean;
-  evidence?: string[];
+  evidence?: EvidenceRecord[];
+  citations?: string[];
   text?: string;
   inputTokens?: number;
   outputTokens?: number;
@@ -24,6 +34,8 @@ export interface AgentRun {
   runId: string;
   taskId: string;
   condition: "baseline" | "optimized";
+  repeatId: string;
+  seed?: number;
   status: RunStatus;
   events: TrajectoryEvent[];
 }
@@ -34,6 +46,7 @@ export type FailureType =
   | "zero_step_termination"
   | "empty_final_answer"
   | "missing_evidence"
+  | "invalid_evidence_source"
   | "tool_error"
   | "blocked"
   | "goal_not_completed";
@@ -42,6 +55,9 @@ export interface EvaluationResult {
   runId: string;
   taskId: string;
   condition: AgentRun["condition"];
+  repeatId: string;
+  seed?: number;
+  pairKey: string;
   passed: boolean;
   failureType: FailureType;
   reasons: string[];
@@ -62,7 +78,7 @@ export interface ConditionSummary {
 }
 
 export interface ComparisonReport {
-  schema: "agent-eval-lab-report-v1";
+  schema: "agent-eval-lab-report-v2";
   generatedAt: string;
   baseline: ConditionSummary;
   optimized: ConditionSummary;
