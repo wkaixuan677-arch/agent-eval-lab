@@ -6,6 +6,10 @@
 
 > 独立 clean-room 项目。仓库只包含合成任务和合成轨迹，不包含公司代码、内部任务、私有网页、真实用户数据或未公开实验结果。
 
+![Agent Eval Lab 演示](docs/demo.gif)
+
+查看：[完整架构说明](docs/ARCHITECTURE.md) · [中文面试讲解材料](docs/INTERVIEW_GUIDE.md)
+
 ## 核心流程
 
 ```text
