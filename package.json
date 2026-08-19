@@ -1,9 +1,12 @@
 {
   "name": "agent-eval-lab",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "description": "可复现的 Agent 轨迹评测、失败归因与配对 A/B 工具",
+  "repository": "github:wkaixuan677-arch/agent-eval-lab",
+  "homepage": "https://github.com/wkaixuan677-arch/agent-eval-lab#readme",
+  "bugs": "https://github.com/wkaixuan677-arch/agent-eval-lab/issues",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "node --import tsx --test test/*.test.ts",

@@ -29,6 +29,9 @@ function binomialCoefficient(n: number, k: number): number {
 }
 
 export function mcnemarExactP(failToPass: number, passToFail: number): number {
+  if (!Number.isInteger(failToPass) || !Number.isInteger(passToFail) || failToPass < 0 || passToFail < 0) {
+    throw new Error("McNemar counts must be non-negative integers");
+  }
   const discordant = failToPass + passToFail;
   if (discordant === 0) return 1;
   const lower = Math.min(failToPass, passToFail);
@@ -40,19 +43,25 @@ export function mcnemarExactP(failToPass: number, passToFail: number): number {
 }
 
 export function comparePaired(results: EvaluationResult[]): ComparisonReport {
-  const baseline = results.filter((result) => result.condition === "baseline");
-  const optimized = results.filter((result) => result.condition === "optimized");
-  const baselineByTask = new Map(baseline.map((result) => [result.taskId, result]));
-  const optimizedByTask = new Map(optimized.map((result) => [result.taskId, result]));
-  const taskIds = [...baselineByTask.keys()].filter((taskId) => optimizedByTask.has(taskId));
+  const baselineByPair = uniqueByPair(results.filter((result) => result.condition === "baseline"), "baseline");
+  const optimizedByPair = uniqueByPair(results.filter((result) => result.condition === "optimized"), "optimized");
+  const baselineKeys = [...baselineByPair.keys()].sort();
+  const optimizedKeys = [...optimizedByPair.keys()].sort();
+  if (baselineKeys.join("\n") !== optimizedKeys.join("\n")) {
+    const missingOptimized = baselineKeys.filter((key) => !optimizedByPair.has(key));
+    const missingBaseline = optimizedKeys.filter((key) => !baselineByPair.has(key));
+    throw new Error(`Unpaired results: missing optimized [${missingOptimized.join(", ")}]; missing baseline [${missingBaseline.join(", ")}]`);
+  }
+  const baseline = baselineKeys.map((key) => baselineByPair.get(key)!);
+  const optimized = baselineKeys.map((key) => optimizedByPair.get(key)!);
 
   let failToPass = 0;
   let passToFail = 0;
   let unchangedPass = 0;
   let unchangedFail = 0;
-  for (const taskId of taskIds) {
-    const before = baselineByTask.get(taskId)!;
-    const after = optimizedByTask.get(taskId)!;
+  for (const key of baselineKeys) {
+    const before = baselineByPair.get(key)!;
+    const after = optimizedByPair.get(key)!;
     if (!before.passed && after.passed) failToPass += 1;
     else if (before.passed && !after.passed) passToFail += 1;
     else if (before.passed) unchangedPass += 1;
@@ -62,12 +71,12 @@ export function comparePaired(results: EvaluationResult[]): ComparisonReport {
   const baselineSummary = summarize(baseline);
   const optimizedSummary = summarize(optimized);
   return {
-    schema: "agent-eval-lab-report-v1",
+    schema: "agent-eval-lab-report-v2",
     generatedAt: new Date().toISOString(),
     baseline: baselineSummary,
     optimized: optimizedSummary,
     paired: {
-      pairs: taskIds.length,
+      pairs: baselineKeys.length,
       failToPass,
       passToFail,
       unchangedPass,
@@ -81,4 +90,13 @@ export function comparePaired(results: EvaluationResult[]): ComparisonReport {
       "正式实验还应报告置信区间、模型配置、环境指纹和人工复核信息。",
     ],
   };
+}
+
+function uniqueByPair(results: EvaluationResult[], condition: string): Map<string, EvaluationResult> {
+  const byPair = new Map<string, EvaluationResult>();
+  for (const result of results) {
+    if (byPair.has(result.pairKey)) throw new Error(`Duplicate ${condition} pair key: ${result.pairKey}`);
+    byPair.set(result.pairKey, result);
+  }
+  return byPair;
 }
