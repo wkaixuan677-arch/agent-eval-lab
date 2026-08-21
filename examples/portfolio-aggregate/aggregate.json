@@ -59,6 +59,21 @@
       "passed": 2,
       "percent": 100.00
     },
+    "hardFullRerun": {
+      "scope": "12-hard-single-vs-multi-full-rerun-sensenova-6.8-flash-lite",
+      "total": 12,
+      "conditionExecutions": 24,
+      "singlePassed": 12,
+      "multiPassed": 12,
+      "singlePercent": 100.00,
+      "multiPercent": 100.00,
+      "singleSteps": 37,
+      "multiSteps": 69,
+      "singleTokens": 336659,
+      "multiTokens": 858477,
+      "providerInfrastructureFailures": 0,
+      "integrityPassed": true
+    },
     "compositeTasks": {
       "scope": "separate-6-task-composite-suite",
       "total": 6,

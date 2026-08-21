@@ -29,7 +29,7 @@ export function validatePortfolioAggregate(value: unknown): PortfolioAggregateVa
   );
   assertExactKeys(
     experiments,
-    ["systemAB", "firstRoundPaired", "memoryAB", "hardFirstRound", "hardTargetedRegression", "compositeTasks"],
+    ["systemAB", "firstRoundPaired", "memoryAB", "hardFirstRound", "hardTargetedRegression", "hardFullRerun", "compositeTasks"],
     "$.experiments",
   );
   const checks: AggregateCheck[] = [];
@@ -109,6 +109,19 @@ export function validatePortfolioAggregate(value: unknown): PortfolioAggregateVa
   assertExactKeys(targeted, ["scope", "total", "passed", "percent"], "$.experiments.hardTargetedRegression");
   checkCountAndPercent(checks, "hard.targeted", targeted.total, targeted.passed, targeted.percent);
   check(checks, "hard.targeted-scope", targeted.scope === "previously-failed-cases-only", "previously-failed-cases-only", String(targeted.scope));
+
+  const rerun = object(experiments.hardFullRerun, "$.experiments.hardFullRerun");
+  assertExactKeys(rerun, ["scope", "total", "conditionExecutions", "singlePassed", "multiPassed", "singlePercent", "multiPercent", "singleSteps", "multiSteps", "singleTokens", "multiTokens", "providerInfrastructureFailures", "integrityPassed"], "$.experiments.hardFullRerun");
+  check(checks, "hard.rerun-scope", rerun.scope === "12-hard-single-vs-multi-full-rerun-sensenova-6.8-flash-lite", "12-hard-single-vs-multi-full-rerun-sensenova-6.8-flash-lite", String(rerun.scope));
+  checkCountAndPercent(checks, "hard.rerun-single", rerun.total, rerun.singlePassed, rerun.singlePercent);
+  checkCountAndPercent(checks, "hard.rerun-multi", rerun.total, rerun.multiPassed, rerun.multiPercent);
+  check(checks, "hard.rerun-executions", integer(rerun.conditionExecutions, "hard.rerun.conditionExecutions") === integer(rerun.total, "hard.rerun.total") * 2, "total × 2", String(rerun.conditionExecutions));
+  check(checks, "hard.rerun-single-steps", positiveInteger(rerun.singleSteps, "hard.rerun.singleSteps") === 37, "37", String(rerun.singleSteps));
+  check(checks, "hard.rerun-multi-steps", positiveInteger(rerun.multiSteps, "hard.rerun.multiSteps") === 69, "69", String(rerun.multiSteps));
+  check(checks, "hard.rerun-single-tokens", positiveInteger(rerun.singleTokens, "hard.rerun.singleTokens") === 336659, "336659", String(rerun.singleTokens));
+  check(checks, "hard.rerun-multi-tokens", positiveInteger(rerun.multiTokens, "hard.rerun.multiTokens") === 858477, "858477", String(rerun.multiTokens));
+  check(checks, "hard.rerun-no-provider-failures", integer(rerun.providerInfrastructureFailures, "hard.rerun.providerInfrastructureFailures") === 0, "0", String(rerun.providerInfrastructureFailures));
+  check(checks, "hard.rerun-integrity", rerun.integrityPassed === true, "true", String(rerun.integrityPassed));
 
   const composite = object(experiments.compositeTasks, "$.experiments.compositeTasks");
   assertExactKeys(composite, ["scope", "total", "singlePassed", "multiPassed", "singlePercent", "multiPercent"], "$.experiments.compositeTasks");
