@@ -29,6 +29,6 @@
 - 增加配对 A/B、Fail→Pass / Pass→Fail 与 exact McNemar 检验；
 - 提供明确标注的合成任务、自动测试、架构图、演示 GIF 与面试材料。
 
-[0.1.0]: https://github.com/wkaixuan677-arch/agent-eval-lab/releases/tag/v0.1.0
-[0.2.0]: https://github.com/wkaixuan677-arch/agent-eval-lab/compare/v0.1.0...v0.2.0
-[0.3.0]: https://github.com/wkaixuan677-arch/agent-eval-lab/compare/v0.2.0...v0.3.0
+[0.1.0]: https://github.com/coolwkx/agent-eval-lab/releases/tag/v0.1.0
+[0.2.0]: https://github.com/coolwkx/agent-eval-lab/compare/v0.1.0...v0.2.0
+[0.3.0]: https://github.com/coolwkx/agent-eval-lab/compare/v0.2.0...v0.3.0

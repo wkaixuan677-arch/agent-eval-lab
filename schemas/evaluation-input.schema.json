@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/wkaixuan677-arch/agent-eval-lab/schemas/evaluation-input.schema.json",
+  "$id": "https://github.com/coolwkx/agent-eval-lab/schemas/evaluation-input.schema.json",
   "title": "Agent Eval Lab v0.3 Input",
   "oneOf": [
     { "$ref": "#/$defs/trajectoryDocument" },

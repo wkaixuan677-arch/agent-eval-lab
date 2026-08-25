@@ -1,7 +1,7 @@
 # Agent Eval Lab
 
-[![CI](https://github.com/wkaixuan677-arch/agent-eval-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/wkaixuan677-arch/agent-eval-lab/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/wkaixuan677-arch/agent-eval-lab)](https://github.com/wkaixuan677-arch/agent-eval-lab/releases)
+[![CI](https://github.com/coolwkx/agent-eval-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/coolwkx/agent-eval-lab/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/coolwkx/agent-eval-lab)](https://github.com/coolwkx/agent-eval-lab/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 **一个面向 LLM Agent 的可复现评测工具：导入 JSON/JSONL 执行轨迹或 A/B 结果，判断目标是否真正完成，并输出可审计的失败归因、配对统计和任务级置信区间。**
@@ -12,9 +12,13 @@
 
 ![Agent Eval Lab 演示](docs/demo.gif)
 
-查看：[完整架构说明](docs/ARCHITECTURE.md) · [中文面试讲解材料](docs/INTERVIEW_GUIDE.md)
+查看：[完整架构说明](docs/ARCHITECTURE.md) · [Hard 实验卡](docs/HARD_SUITE_EXPERIMENT_CARD.md) · [中文面试讲解材料](docs/INTERVIEW_GUIDE.md)
 
-作品集导航：[Browser Runtime](https://github.com/wkaixuan677-arch/browser-agent-runtime-lite) · **Agent Eval Lab** · [Research Agent](https://github.com/wkaixuan677-arch/open-source-research-agent)
+作品集导航：[Browser Runtime](https://github.com/coolwkx/browser-agent-runtime-lite) · **Agent Eval Lab** · [Research Agent](https://github.com/coolwkx/open-source-research-agent)
+
+## 在整套 Agent 工程中的位置
+
+本仓库负责“**可信评测**”：接收 Runtime 或业务 Agent 生成的轨迹，区分进程结束、动作完成与用户目标完成，并输出配对统计和失败归因。[Browser Runtime](https://github.com/coolwkx/browser-agent-runtime-lite) 提供可审计执行闭环，[Research Agent](https://github.com/coolwkx/open-source-research-agent) 提供具体应用案例。
 
 ## 核心流程
 
@@ -188,7 +192,7 @@ reports/           本地生成的报告目录
 
 ## 相关项目
 
-- [browser-agent-runtime-lite](https://github.com/wkaixuan677-arch/browser-agent-runtime-lite)：证据门控、有限恢复的 Browser Agent 最小运行时。
+- [browser-agent-runtime-lite](https://github.com/coolwkx/browser-agent-runtime-lite)：证据门控、有限恢复的 Browser Agent 最小运行时。
 
 ## 开源协议
 
