@@ -36,8 +36,8 @@
     "check": "npm run build && npm test && npm run demo && npm run evidence:recompute && npm run portfolio:validate"
   },
   "devDependencies": {
-    "@types/node": "^26.1.2",
-    "tsx": "^4.23.10",
+    "@types/node": "^26.4.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   },
   "engines": {
